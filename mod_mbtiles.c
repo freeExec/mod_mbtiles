@@ -26,6 +26,8 @@
 #include "util_script.h"
 #include "http_connection.h"
 
+#include "mod_core.h"
+
 #include "apr_strings.h"
 
 #include <sqlite3.h>
@@ -302,6 +304,12 @@ int findTileset(const char* version, const char* name) {
 }
 
 int mbtiles_composite_handler(const request_rec* r) {
+	if (r->method_number == M_OPTIONS)
+	{
+		ap_allow_methods(r, 1, "GET", NULL);
+		return ap_send_http_options(r);
+	}
+
 #ifndef TEST_MOD
 	DirectoryConfig* config = (DirectoryConfig*)ap_get_module_config(r->per_dir_config, &mbtiles_module);
 	if (config->enabled == OFF) return(DECLINED);
